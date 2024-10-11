@@ -12,13 +12,13 @@ import { OrderDetailsModule } from './modules/order.details/order.details.module
 import { LikesModule } from './modules/likes/likes.module';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
       }),
@@ -32,6 +32,7 @@ import { UsersModule } from './modules/users/users.module';
     OrdersModule,
     OrderDetailsModule,
     LikesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
