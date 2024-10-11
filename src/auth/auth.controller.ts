@@ -38,10 +38,14 @@ export class AuthController {
   @Public()
   testMail() {
     this.mailerService.sendMail({
-      to: 'danhdudoan999@gmail.com',
-      subject: 'Testing Nest MailerModule ✔',
-      text: 'welcome',
-      html: '<b>hello</b>',
+      to: 'danhdudoan999@gmail.com', // list of receivers
+      subject: 'Testing Nest MailerModule ✔', // Subject line
+      text: 'welcome', // plaintext body
+      template: 'register',
+      context: {
+        name: 'Eric',
+        activationCode: 123456789,
+      },
     });
     return 'ok';
   }
