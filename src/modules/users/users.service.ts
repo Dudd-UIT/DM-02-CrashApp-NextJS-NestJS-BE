@@ -8,7 +8,7 @@ import { hashPasswordHelper } from '@/helpers/util';
 import aqp from 'api-query-params';
 import { v4 as uuid4 } from 'uuid';
 import * as dayjs from 'dayjs';
-import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import { CodeDto, CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -134,5 +134,22 @@ export class UsersService {
     return {
       _id: user._id,
     };
+  }
+
+  async handleCheckCode(codeDto: CodeDto) {
+    const user = await this.userModel.findOne({
+      _id: codeDto.id,
+      codeId: codeDto.code,
+    });
+    if (!user) {
+      throw new BadRequestException('Mã code không hợp lệ');
+    }
+    const isBeforeExpired = dayjs().isBefore(user?.codeExpired);
+    if (isBeforeExpired) {
+      await this.userModel.updateOne({ _id: codeDto.id }, { isActive: true });
+      return { isBeforeExpired };
+    } else {
+      throw new BadRequestException('Mã code đã hết hạn');
+    }
   }
 }
