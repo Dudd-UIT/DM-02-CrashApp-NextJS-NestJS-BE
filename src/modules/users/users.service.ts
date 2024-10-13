@@ -8,7 +8,11 @@ import { hashPasswordHelper } from '@/helpers/util';
 import aqp from 'api-query-params';
 import { v4 as uuid4 } from 'uuid';
 import * as dayjs from 'dayjs';
-import { CodeDto, CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import {
+  ChangePasswordDto,
+  CodeDto,
+  CreateAuthDto,
+} from '@/auth/dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -177,5 +181,55 @@ export class UsersService {
       },
     });
     return { _id: user._id };
+  }
+
+  async handleRetryPassword(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Tài khoản không tồn tại');
+    }
+
+    const codeId = uuid4();
+    await this.userModel.updateOne(
+      { _id: user._id },
+      { codeId: codeId, codeExpired: dayjs().add(1, 'minute') },
+    );
+    this.mailerService.sendMail({
+      to: user.email, // list of receivers
+      subject: 'MR.BUOI Change password code', // Subject line
+      text: 'welcome', // plaintext body
+      template: 'register',
+      context: {
+        name: user?.name ?? user.email,
+        activationCode: codeId,
+      },
+    });
+    return { _id: user._id, email: user.email };
+  }
+
+  async handleChangePassword(changePasswordDto: ChangePasswordDto) {
+    if (changePasswordDto.password !== changePasswordDto.confirmPassword) {
+      throw new BadRequestException(
+        'Mật khẩu mới không đồng nhất với mật khẩu xác nhận',
+      );
+    }
+    const user = await this.userModel.findOne({
+      email: changePasswordDto.email,
+    });
+    if (!user) {
+      throw new BadRequestException('Tài khoản không tồn tại');
+    }
+
+    const isBeforeExpired = dayjs().isBefore(user?.codeExpired);
+    if (isBeforeExpired) {
+      const newPassword = await hashPasswordHelper(changePasswordDto.password);
+      await this.userModel.updateOne(
+        { _id: user.id },
+        { password: newPassword },
+      );
+      return { isBeforeExpired };
+    } else {
+      throw new BadRequestException('Mã code đã hết hạn');
+    }
   }
 }

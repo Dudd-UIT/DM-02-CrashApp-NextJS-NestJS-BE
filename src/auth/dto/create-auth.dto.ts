@@ -18,3 +18,17 @@ export class CodeDto {
   @IsNotEmpty()
   code: string;
 }
+
+export class ChangePasswordDto {
+  @IsNotEmpty()
+  code: string;
+
+  @IsNotEmpty()
+  password: string;
+
+  @IsNotEmpty()
+  confirmPassword: string;
+
+  @IsNotEmpty()
+  email: string;
+}
