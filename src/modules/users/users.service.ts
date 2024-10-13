@@ -121,8 +121,8 @@ export class UsersService {
     });
 
     this.mailerService.sendMail({
-      to: 'danhdudoan999@gmail.com', // list of receivers
-      subject: 'Testing Nest MailerModule ✔', // Subject line
+      to: user.email, // list of receivers
+      subject: 'MR.BUOI Activation code', // Subject line
       text: 'welcome', // plaintext body
       template: 'register',
       context: {
@@ -151,5 +151,31 @@ export class UsersService {
     } else {
       throw new BadRequestException('Mã code đã hết hạn');
     }
+  }
+
+  async handleRetryActive(email: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Tài khoản không tồn tại');
+    }
+    if (user.isActive) {
+      throw new BadRequestException('Tài khoản đã được kích hoạt');
+    }
+    const codeId = uuid4();
+    await this.userModel.updateOne(
+      { _id: user._id },
+      { codeId: codeId, codeExpired: dayjs().add(1, 'minute') },
+    );
+    this.mailerService.sendMail({
+      to: user.email, // list of receivers
+      subject: 'MR.BUOI Activation code', // Subject line
+      text: 'welcome', // plaintext body
+      template: 'register',
+      context: {
+        name: user?.name ?? user.email,
+        activationCode: codeId,
+      },
+    });
+    return { _id: user._id };
   }
 }
