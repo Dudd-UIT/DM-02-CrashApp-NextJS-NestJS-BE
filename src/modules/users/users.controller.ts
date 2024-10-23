@@ -27,6 +27,7 @@ export class UsersController {
     @Query('current') current: string,
     @Query('pageSize') pageSize: string,
   ) {
+    console.log('>>>');
     return this.usersService.findAll(query, +current, +pageSize);
   }
 

@@ -29,7 +29,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @ResponseMessage('Fetch login')
   async handleLogin(@Request() req) {
-    console.log('request.user1', req.user);
     return this.authService.login(req.user);
   }
 
@@ -48,14 +47,12 @@ export class AuthController {
   @Public()
   @Post('retry-active')
   retryActive(@Body('email') email: string) {
-    console.log(email);
     return this.authService.retryActive(email);
   }
 
   @Public()
   @Post('retry-password')
   retryPassword(@Body('email') email: string) {
-    console.log(email);
     return this.authService.retryPassword(email);
   }
 

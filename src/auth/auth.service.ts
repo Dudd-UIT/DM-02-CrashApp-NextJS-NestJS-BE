@@ -25,7 +25,6 @@ export class AuthService {
       return null;
     }
     const { password, ...result } = user.toObject();
-    console.log('result', result);
     return result;
   }
 

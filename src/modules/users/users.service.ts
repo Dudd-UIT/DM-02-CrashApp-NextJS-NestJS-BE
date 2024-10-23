@@ -45,7 +45,6 @@ export class UsersService {
       address,
       image,
     });
-    console.log('hashPassword', hashPassword);
     return {
       _id: user._id,
     };
@@ -86,7 +85,6 @@ export class UsersService {
 
   async findOneByEmail(email: string) {
     const a = await this.userModel.findOne({ email });
-    console.log('>>>a', a);
     return a;
   }
 
